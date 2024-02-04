@@ -149,14 +149,6 @@ def closeCallOption(leverage, portafoglio, trackingFileName, df_stock, todaysDat
     portafoglio.callStrikePrice = 0
     return tracking
 
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
-
-leverage = 1
-deviationLowerArray = [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
-deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
-expirationDaysPutArray = [3, 7,  28,  42, 70, 100, 161, 210, 275, 325]
-expirationDaysCallArray = [3, 7,  28,  42, 70, 100, 161, 210, 275, 325]
-
 def calcualteProfit(df_options, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall):
     portafoglio = Portfolio(0)
     trackingFileName = f'tracking_L_{deviationLower}_U_{deviationUpper}_EP_{expirationDaysPut}_EC_{expirationDaysCall}L_{leverage}.csv'
@@ -218,8 +210,16 @@ def calcualteProfit(df_options, leverage, deviationLower, deviationUpper, expira
     end_time = time.time()
     print('Execution time: ' + str(end_time - start_time) + ' seconds')
 
+df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
+
+leverage = 1
+deviationLowerArray = [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
+deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
+expirationDaysPutArray = [3, 7,  28,  42, 70, 100, 161, 210, 275, 325]
+expirationDaysCallArray = [3, 7,  28,  42, 70, 100, 161, 210, 275, 325]
+
 for deviationLower in deviationLowerArray:
     for deviationUpper in deviationUpperArray:
         for expirationDaysPut in expirationDaysPutArray:
             for expirationDaysCall in expirationDaysCallArray:
-                calcualteProfit(df_options, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall)
+                calcualteProfit(leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall)
