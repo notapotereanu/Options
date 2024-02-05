@@ -7,8 +7,6 @@ import time ,os
 from Portafolio import Portfolio
 
 warnings.filterwarnings("ignore")
-pd.options.display.max_columns = None
-pd.options.display.max_rows = None
 
 def getStockDataWithBolinger(ticker, start_date, deviationUpper, deviationLower):
     print('Loading stock data for: ' + ticker)
@@ -32,8 +30,12 @@ def loadOptionsDataframe(pattern):
 
     df['expiration'] = pd.to_datetime(df['expiration'], format='%d/%m/%Y')
     df['quotedate'] = pd.to_datetime(df['quotedate'], format='%d/%m/%Y')
-    return df
 
+    # Sort DataFrame by quotedate and strike
+    df.sort_values(by=['quotedate', 'strike'], inplace=True)
+
+    return df
+    
 def findPutorCallOptionsToOpen(df_options, strikePriceSearched, dateSearched ,expirationDateSearched, typeSearched):
     df = df_options[df_options['quotedate'] == dateSearched]
     df = df[df['type'] == typeSearched]
@@ -103,8 +105,6 @@ def trackingCurrentDayPL(df_options, df_stock, portafoglio: Portfolio, tracking:
         new_row['callPriceToday'] = callPriceToday
         new_row['putPriceToday'] = putPriceToday
     
-    #new_row_df = pd.DataFrame(new_row, index=[0])
-    #return tracking.append(new_row_df, ignore_index=True)
     tracking.append(new_row)
 
 def closePutOption(leverage, portafoglio, trackingFileName, df_stock, todaysDate, tracking,reason):
@@ -197,6 +197,7 @@ def calcualteProfit(df_options, leverage, deviationLower, deviationUpper, expira
             raise Exception('Error: no positions to close')
 
         if todaysDate == row.expiration.values[0]:
+            print('Expiration day '+ todaysDate.strftime('%Y-%m-%d') + ' ' + trackingFileName)
             if portafoglio.putOwned > 0:
                 closePutOption(leverage, portafoglio, trackingFileName, df_stock, todaysDate, tracking, 'expirationDay')
                 continue
@@ -209,17 +210,30 @@ def calcualteProfit(df_options, leverage, deviationLower, deviationUpper, expira
     tracking.to_csv(trackingFileName, index=False)
     end_time = time.time()
     print('Execution time: ' + str(end_time - start_time) + ' seconds')
-
+    
+print("ciao")
 df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
 
 leverage = 1
 deviationLowerArray = [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
-expirationDaysPutArray = [3, 7,  28,  42, 70, 100, 161, 210, 275, 325]
-expirationDaysCallArray = [3, 7,  28,  42, 70, 100, 161, 210, 275, 325]
+expirationDaysPutArray = [3, 7,  21, 31, 42, 70, 100, 161, 210, 275, 325]
+expirationDaysCallArray = [3, 7,  21, 31 , 42, 70, 100, 161, 210, 275, 325]
 
-for deviationLower in deviationLowerArray:
-    for deviationUpper in deviationUpperArray:
-        for expirationDaysPut in expirationDaysPutArray:
-            for expirationDaysCall in expirationDaysCallArray:
-                calcualteProfit(leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall)
+deviationLowerArray = [1.3]
+print("ciao")    
+                
+import concurrent.futures
+
+def worker(deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall):
+    return calcualteProfit(df_options, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall)
+
+with concurrent.futures.ProcessPoolExecutor(max_workers=2) as executor:
+    futures = []
+    for deviationLower in deviationLowerArray:
+        for deviationUpper in deviationUpperArray:
+            for expirationDaysPut in expirationDaysPutArray:
+                for expirationDaysCall in expirationDaysCallArray:
+                    futures.append(executor.submit(worker, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall))
+
+    results = [future.result() for future in concurrent.futures.as_completed(futures)]
