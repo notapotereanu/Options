@@ -153,7 +153,7 @@ def closeCallOption(leverage, portafoglio, trackingFileName, df_stock, todaysDat
 
 def calculateProfit(df_options, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall):
     portafoglio = Portfolio(0)
-    trackingFileName = f'tracking_L_{deviationLower}_U_{deviationUpper}_EP_{expirationDaysPut}_EC_{expirationDaysCall}L_{leverage}.csv'
+    trackingFileName = f'Tracking/tracking_L_{deviationLower}_U_{deviationUpper}_EP_{expirationDaysPut}_EC_{expirationDaysCall}L_{leverage}.csv'
     if os.path.isfile(trackingFileName):
         return
     df_stock = getStockDataWithBolinger('SPY', '2017-10-01', deviationUpper, deviationLower)
@@ -218,14 +218,14 @@ deviationLowerArray = [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 expirationDaysPutArray = [3, 7,  21, 31, 42, 70, 100, 161, 210, 275, 325]
 expirationDaysCallArray = [3, 7,  21, 31 , 42, 70, 100, 161, 210, 275, 325]
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
+df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2019*.csv')
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--devLower', type=ast.literal_eval, default=[],
+parser.add_argument('--deviationLowerArray', type=ast.literal_eval, default=[],
                     help='An array to be passed to the script')
 
 args = parser.parse_args()
-deviationLowerArray = args.devLower
+deviationLowerArray = args.deviationLowerArray
 
 for deviationLower in deviationLowerArray:
     for deviationUpper in deviationUpperArray:
