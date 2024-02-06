@@ -5,6 +5,8 @@ from datetime import timedelta
 import warnings
 import time ,os
 from Portafolio import Portfolio
+import argparse
+import ast
 
 warnings.filterwarnings("ignore")
 
@@ -217,12 +219,17 @@ deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 expirationDaysPutArray = [3, 7,  21, 31, 42, 70, 100, 161, 210, 275, 325]
 expirationDaysCallArray = [3, 7,  21, 31 , 42, 70, 100, 161, 210, 275, 325]
 df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
-#df_options = pd.read_csv("df_options_full.csv")
 
-deviationLowerArray = [1.3]
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--devLower', type=ast.literal_eval, default=[],
+                    help='An array to be passed to the script')
+
+args = parser.parse_args()
+deviationLowerArray = args.devLower
 
 for deviationLower in deviationLowerArray:
     for deviationUpper in deviationUpperArray:
         for expirationDaysPut in expirationDaysPutArray:
             for expirationDaysCall in expirationDaysCallArray:
                 calculateProfit(df_options, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall)
+print('Done')
