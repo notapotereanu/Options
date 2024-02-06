@@ -219,7 +219,7 @@ expirationDaysCallArray = [3, 7,  21, 31 , 42, 70, 100, 161, 210, 275, 325]
 df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
 #df_options = pd.read_csv("df_options_full.csv")
 
-deviationLowerArray = [1.3]
+deviationLowerArray = [1.5]
 
 for deviationLower in deviationLowerArray:
     for deviationUpper in deviationUpperArray:
