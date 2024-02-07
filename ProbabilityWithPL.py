@@ -39,16 +39,15 @@ def loadOptionsDataframe(pattern):
     return df
     
 def findPutorCallOptionsToOpen(df_options, strikePriceSearched, dateSearched ,expirationDateSearched, typeSearched):
-    df = df_options[df_options['quotedate'] == dateSearched]
-    df = df[df['type'] == typeSearched]
-    df = df[df['expiration'] <= expirationDateSearched]
-    if df.empty:
+    dfFilteredByDate = df_options.loc[dateSearched]
+    dfFilteredByDateAndOptionType = dfFilteredByDate[dfFilteredByDate['type'] == typeSearched]
+    dfFilteredByDTE = dfFilteredByDateAndOptionType[dfFilteredByDateAndOptionType['expiration'] <= expirationDateSearched]
+    if dfFilteredByDTE.empty:
         return 'No options found that match the given criteria.'
-    nearest_expiration = df['expiration'].max()
-    df = df[df['expiration'] == nearest_expiration]
-    closest_index = (df['strike'] - strikePriceSearched).abs().idxmin()
-    df = df.loc[closest_index]
-    return df
+    nearest_expiration = dfFilteredByDTE['expiration'].max()
+    dfFilteredByNearestExpiration = dfFilteredByDTE[dfFilteredByDTE['expiration'] == nearest_expiration]
+    min_difference = (dfFilteredByNearestExpiration['strike'] - strikePriceSearched).abs().min()
+    return dfFilteredByNearestExpiration[(dfFilteredByNearestExpiration['strike'] - strikePriceSearched).abs() == min_difference]
 
 def trackingCurrentDayPL(df_options, df_stock, portafoglio: Portfolio, tracking: list, todaysDate, trackType):
     new_row = {'date': todaysDate, 
@@ -88,14 +87,20 @@ def trackingCurrentDayPL(df_options, df_stock, portafoglio: Portfolio, tracking:
 
         if portafoglio.putOwned > 0:
             originalValue = portafoglio.putOwned * portafoglio.putOwnedSoldAt 
-            row = df_options[(df_options['optionroot'] == portafoglio.putOwnedContract) & (df_options['quotedate'] == todaysDate)]
+            
+            row = df_options.loc[todaysDate]
+            row = row[row['optionroot'] == portafoglio.putOwnedContract]
+            
             putPriceToday = row['ask'].values[0]
             todaysValue =  putPriceToday * portafoglio.putOwned
             underliazed = (underliazed + (originalValue - todaysValue) * 100) 
 
         if portafoglio.callOwned > 0:
             originalValue = portafoglio.callOwned * portafoglio.callOwnedSoldAt
-            row = df_options[(df_options['optionroot'] == portafoglio.callOwnedContract) & (df_options['quotedate'] == todaysDate)]
+            
+            row = df_options.loc[todaysDate]
+            row = row[row['optionroot'] == portafoglio.callOwnedContract]
+            
             callPriceToday = row['ask'].values[0]
             todaysValue = callPriceToday * portafoglio.callOwned
             underliazed = (underliazed + (originalValue - todaysValue)* 100) 
@@ -155,7 +160,7 @@ def calculateProfit(df_options, leverage, deviationLower, deviationUpper, expira
     if os.path.isfile(trackingFileName):
         return
     df_stock = getStockDataWithBolinger('SPY', '2017-10-01', deviationUpper, deviationLower)
-    unique_dates = sorted(df_options['quotedate'].unique())
+    unique_dates = sorted(df_options.index.unique().tolist())
     start_time = time.time()
     tracking = []
 
@@ -164,32 +169,34 @@ def calculateProfit(df_options, leverage, deviationLower, deviationUpper, expira
             expirationDate = (todaysDate + timedelta(days=expirationDaysPut)).strftime('%Y-%m-%d')
             lowerBand, higherBand = df_stock.loc[todaysDate, ['Lower', 'Upper']]
             nextPutOption = findPutorCallOptionsToOpen(df_options, lowerBand, todaysDate, expirationDate, 'put')
-            if round(nextPutOption['bid'] - 0.02, 2) <= 0:
+            if round(nextPutOption['bid'].iloc[0] - 0.02, 2) <= 0:
                 trackingCurrentDayPL(df_options, df_stock, portafoglio, tracking, todaysDate, 'bidTooLow')
                 continue
-            portafoglio.putOwnedSoldAt = round(nextPutOption['bid'] - 0.02, 2) #commissioni
-            portafoglio.putOwnedContract = nextPutOption['optionroot']
+            portafoglio.putOwnedSoldAt = round(nextPutOption['bid'].iloc[0] - 0.02, 2) #commissioni
+            portafoglio.putOwnedContract = nextPutOption['optionroot'].iloc[0]
             portafoglio.putOwned = 1 * leverage
-            portafoglio.putStrikePrice = nextPutOption['strike']
+            portafoglio.putStrikePrice = nextPutOption['strike'].iloc[0]
         elif portafoglio.stocksOwned > 0 and portafoglio.callOwned == 0:
             expirationDate = (todaysDate + timedelta(days=expirationDaysCall)).strftime('%Y-%m-%d')
             lowerBand, higherBand = df_stock.loc[todaysDate, ['Lower', 'Upper']]
             nextCallOption = findPutorCallOptionsToOpen(df_options, higherBand, todaysDate, expirationDate, 'call')
-            if round(nextCallOption['bid'] - 0.02, 2) <= 0:
+            if round(nextCallOption['bid'].iloc[0] - 0.02, 2) <= 0:
                 trackingCurrentDayPL(df_options, df_stock, portafoglio, tracking, todaysDate, 'bidTooLow')
                 continue
-            portafoglio.callOwnedSoldAt = round(nextCallOption['bid'] - 0.02, 2)  #commissioni
-            portafoglio.callOwnedContract = nextCallOption['optionroot']
+            portafoglio.callOwnedSoldAt = round(nextCallOption['bid'].iloc[0] - 0.02, 2)  #commissioni
+            portafoglio.callOwnedContract = nextCallOption['optionroot'].iloc[0]
             portafoglio.callOwned = 1 * leverage
-            portafoglio.callStrikePrice = nextCallOption['strike']
+            portafoglio.callStrikePrice = nextCallOption['strike'].iloc[0]
 
         if portafoglio.putOwned > 0:
-            row = df_options[(df_options['optionroot'] == portafoglio.putOwnedContract) & (df_options['quotedate'] == todaysDate)]
+            row = df_options.loc[todaysDate]
+            row = row[row['optionroot'] == portafoglio.putOwnedContract]
             if row.empty:
                 closeCallOption(leverage,portafoglio, trackingFileName, df_stock, todaysDate, tracking,'optionNotFound')
                 continue
         elif portafoglio.callOwned > 0:
-            row = df_options[(df_options['optionroot'] == portafoglio.callOwnedContract) & (df_options['quotedate'] == todaysDate)]
+            row = df_options.loc[todaysDate]
+            row = row[row['optionroot'] == portafoglio.callOwnedContract]
             if row.empty:
                 closeCallOption(leverage, portafoglio, trackingFileName, df_stock, todaysDate, tracking,'optionNotFound')
                 continue
@@ -216,7 +223,10 @@ deviationLowerArray = [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 expirationDaysPutArray = [3, 7,  21, 31, 42, 70, 100, 161, 210, 275, 325]
 expirationDaysCallArray = [3, 7,  21, 31 , 42, 70, 100, 161, 210, 275, 325]
+
 df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2019*.csv')
+df_options = df_options.set_index('quotedate', drop=False)
+df_options = df_options.sort_index()
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--deviationLowerArray', type=ast.literal_eval, default=[],
