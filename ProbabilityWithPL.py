@@ -222,7 +222,7 @@ leverage = 1
 expirationDaysPutTimes = 10
 expirationDaysCallTimes = 10
 
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2018*.csv')
+df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
 df_options = df_options.set_index('quotedate', drop=False)
 df_options = df_options.sort_index()
 df_stock = getStockData('SPY', '2017-10-01')
