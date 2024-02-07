@@ -207,7 +207,6 @@ def calculateProfit(df_options,df_stock, leverage, deviationLower, deviationUppe
             raise Exception('Error: no positions to close')
 
         if todaysDate == row.expiration.values[0]:
-            print('Expiration day '+ todaysDate.strftime('%Y-%m-%d') + ' ' + trackingFileName)
             if portafoglio.putOwned > 0:
                 closePutOption(leverage, portafoglio, trackingFileName, df_stock, todaysDate, tracking, 'expirationDay')
                 continue
@@ -241,13 +240,13 @@ deviationLowerArrayTo = args.deviationLowerArrayTo[0]
 
 for deviationLower in np.arange(deviationLowerArrayFrom, deviationLowerArrayTo, 0.1) :
     for deviationUpper in np.arange(-1, 5, 0.1):
-        for expirationDaysPutTime in range(expirationDaysPutTimes):
-            expirationDaysPut = 1,61 * expirationDaysPut
-            for expirationDaysCallSingle in range(expirationDaysCallTimes):
+        for expirationDaysPutSingle in range(1,expirationDaysPutTimes):
+            expirationDaysPut = int(round(1.61 * expirationDaysPutSingle,0))
+            for expirationDaysCallSingle in range(1,expirationDaysCallTimes):
                 start_time = time.time()
-                expirationDaysCall = 1,61 * expirationDaysCallSingle
+                expirationDaysCall = int(round(1.61 * expirationDaysCallSingle,2))
                 df_stock_bolingher = getBolingherBands(df_stock, round(deviationUpper,2), round(deviationLower,2))
                 calculateProfit(df_options, df_stock_bolingher, leverage, round(deviationLower,2), round(deviationUpper,2), expirationDaysPut, expirationDaysCall)
                 end_time = time.time()
-                print('Execution time: ' + str(end_time - start_time) + ' seconds')
+                print('Execution time: ' + str(end_time - start_time) + ' seconds' + ' L: ' + str(round(deviationLower,2)) + ' U: ' + str(round(deviationUpper,2)) + ' EP: ' + str(expirationDaysPut) + ' EC: ' + str(expirationDaysCall) + ' L: ' + str(leverage)
 print('Done')
