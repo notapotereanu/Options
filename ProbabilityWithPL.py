@@ -17,7 +17,6 @@ def getStockData(ticker, start_date):
     return  data    
 
 def getBolingherBands(data, deviationUpper, deviationLower):
-    print('Calculating Bolingher Bands')
     data['SMA'] = data['Close'].rolling(window=20).mean()
     data['STD'] = data['Close'].rolling(window=20).std()
     data['Upper'] = data['SMA'] + (data['STD'] * deviationUpper)
