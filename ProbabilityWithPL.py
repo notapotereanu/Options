@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import timedelta
 import warnings
 import time ,os
+import numpy as np
 from Portafolio import Portfolio
 import argparse
 import ast
@@ -164,7 +165,6 @@ def calculateProfit(df_options,df_stock, leverage, deviationLower, deviationUppe
     if os.path.isfile(trackingFileName):
         return
     unique_dates = sorted(df_options.index.unique().tolist())
-    start_time = time.time()
     tracking = []
 
     for todaysDate in unique_dates:
@@ -218,31 +218,36 @@ def calculateProfit(df_options,df_stock, leverage, deviationLower, deviationUppe
         trackingCurrentDayPL(df_options, df_stock, portafoglio, tracking, todaysDate, 'normalDay')
     tracking = pd.DataFrame(tracking)
     tracking.to_csv(trackingFileName, index=False)
-    end_time = time.time()
-    print('Execution time: ' + str(end_time - start_time) + ' seconds')
+
 
 leverage = 1
-deviationLowerArray = [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
-deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
-expirationDaysPutArray = [3, 7,  21, 31, 42, 70, 100, 161, 210, 275, 325]
-expirationDaysCallArray = [3, 7,  21, 31 , 42, 70, 100, 161, 210, 275, 325]
+expirationDaysPutTimes = 10
+expirationDaysCallTimes = 10
 
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
+df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2018*.csv')
 df_options = df_options.set_index('quotedate', drop=False)
 df_options = df_options.sort_index()
-
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--deviationLowerArray', type=ast.literal_eval, default=[],
-                    help='An array to be passed to the script')
-
-args = parser.parse_args()
-deviationLowerArray = args.deviationLowerArray
 df_stock = getStockData('SPY', '2017-10-01')
 
-for deviationLower in deviationLowerArray:
-    for deviationUpper in deviationUpperArray:
-        for expirationDaysPut in expirationDaysPutArray:
-            for expirationDaysCall in expirationDaysCallArray:
-                df_stock_bolingher = getBolingherBands(df_stock, deviationUpper, deviationLower)
-                calculateProfit(df_options, df_stock_bolingher, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall)
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--deviationLowerArrayFrom', type=ast.literal_eval, default=[],
+                    help='An array to be passed to the script')
+parser.add_argument('--deviationLowerArrayTo', type=ast.literal_eval, default=[],
+                    help='Another array to be passed to the script')
+
+args = parser.parse_args()
+deviationLowerArrayFrom = args.deviationLowerArrayFrom[0]
+deviationLowerArrayTo = args.deviationLowerArrayTo[0]
+
+for deviationLower in np.arange(deviationLowerArrayFrom, deviationLowerArrayTo, 0.1) :
+    for deviationUpper in np.arange(-1, 5, 0.1):
+        for expirationDaysPutTime in range(expirationDaysPutTimes):
+            expirationDaysPut = 1,61 * expirationDaysPut
+            for expirationDaysCallSingle in range(expirationDaysCallTimes):
+                start_time = time.time()
+                expirationDaysCall = 1,61 * expirationDaysCallSingle
+                df_stock_bolingher = getBolingherBands(df_stock, round(deviationUpper,2), round(deviationLower,2))
+                calculateProfit(df_options, df_stock_bolingher, leverage, round(deviationLower,2), round(deviationUpper,2), expirationDaysPut, expirationDaysCall)
+                end_time = time.time()
+                print('Execution time: ' + str(end_time - start_time) + ' seconds')
 print('Done')
