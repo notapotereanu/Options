@@ -10,14 +10,18 @@ import ast
 
 warnings.filterwarnings("ignore")
 
-def getStockDataWithBolinger(ticker, start_date, deviationUpper, deviationLower):
+def getStockData(ticker, start_date):
     print('Loading stock data for: ' + ticker)
     data = yf.download(ticker, start=start_date)
+    return  data    
+
+def getBolingherBands(data, deviationUpper, deviationLower):
+    print('Calculating Bolingher Bands')
     data['SMA'] = data['Close'].rolling(window=20).mean()
     data['STD'] = data['Close'].rolling(window=20).std()
     data['Upper'] = data['SMA'] + (data['STD'] * deviationUpper)
     data['Lower'] = data['SMA'] - (data['STD'] * deviationLower)
-    return  data    
+    return  data  
 
 def loadOptionsDataframe(pattern):
     csv_files = glob.glob(pattern)
@@ -154,12 +158,11 @@ def closeCallOption(leverage, portafoglio, trackingFileName, df_stock, todaysDat
     portafoglio.callStrikePrice = 0
     return tracking
 
-def calculateProfit(df_options, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall):
+def calculateProfit(df_options,df_stock, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall):
     portafoglio = Portfolio(0)
     trackingFileName = f'Tracking/tracking_L_{deviationLower}_U_{deviationUpper}_EP_{expirationDaysPut}_EC_{expirationDaysCall}L_{leverage}.csv'
     if os.path.isfile(trackingFileName):
         return
-    df_stock = getStockDataWithBolinger('SPY', '2017-10-01', deviationUpper, deviationLower)
     unique_dates = sorted(df_options.index.unique().tolist())
     start_time = time.time()
     tracking = []
@@ -234,10 +237,12 @@ parser.add_argument('--deviationLowerArray', type=ast.literal_eval, default=[],
 
 args = parser.parse_args()
 deviationLowerArray = args.deviationLowerArray
+df_stock = getStockData('SPY', '2017-10-01')
 
 for deviationLower in deviationLowerArray:
     for deviationUpper in deviationUpperArray:
         for expirationDaysPut in expirationDaysPutArray:
             for expirationDaysCall in expirationDaysCallArray:
-                calculateProfit(df_options, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall)
+                df_stock_bolingher = getBolingherBands(df_stock, deviationUpper, deviationLower)
+                calculateProfit(df_options, df_stock_bolingher, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall)
 print('Done')
