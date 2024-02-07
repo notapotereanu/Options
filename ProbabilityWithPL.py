@@ -224,7 +224,7 @@ deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 expirationDaysPutArray = [3, 7,  21, 31, 42, 70, 100, 161, 210, 275, 325]
 expirationDaysCallArray = [3, 7,  21, 31 , 42, 70, 100, 161, 210, 275, 325]
 
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2019*.csv')
+df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
 df_options = df_options.set_index('quotedate', drop=False)
 df_options = df_options.sort_index()
 
