@@ -77,8 +77,8 @@ def trackingCurrentDayPL(df_options, df_stock, portafoglio: Portfolio, tracking:
         new_row['callPriceToday'] = 0
         new_row['putPriceToday'] = 0
     else:
-        underliazed = 0
         putPriceToday = 0
+        underliazed = 0
         callPriceToday = 0
         
         if portafoglio.stocksOwned > 0:
@@ -89,17 +89,15 @@ def trackingCurrentDayPL(df_options, df_stock, portafoglio: Portfolio, tracking:
         if portafoglio.putOwned > 0:
             originalValue = portafoglio.putOwned * portafoglio.putOwnedSoldAt 
             row = df_options[(df_options['optionroot'] == portafoglio.putOwnedContract) & (df_options['quotedate'] == todaysDate)]
-            ask_value = row['ask'].values[0]
-            putPriceToday = ask_value
-            todaysValue =  ask_value * portafoglio.putOwned
+            putPriceToday = row['ask'].values[0]
+            todaysValue =  putPriceToday * portafoglio.putOwned
             underliazed = (underliazed + (originalValue - todaysValue) * 100) 
 
         if portafoglio.callOwned > 0:
             originalValue = portafoglio.callOwned * portafoglio.callOwnedSoldAt
             row = df_options[(df_options['optionroot'] == portafoglio.callOwnedContract) & (df_options['quotedate'] == todaysDate)]
-            ask_value = row['ask'].values[0]
-            callPriceToday = ask_value
-            todaysValue = ask_value * portafoglio.callOwned
+            callPriceToday = row['ask'].values[0]
+            todaysValue = callPriceToday * portafoglio.callOwned
             underliazed = (underliazed + (originalValue - todaysValue)* 100) 
         portafoglio.unrializedPnL = round(underliazed,2)
 
@@ -218,7 +216,7 @@ deviationLowerArray = [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 deviationUpperArray =  [1.1, 1.3,  1.5,  1.7, 1.9, 2.1,  2.3,  2.5,  2.7, 2.9]
 expirationDaysPutArray = [3, 7,  21, 31, 42, 70, 100, 161, 210, 275, 325]
 expirationDaysCallArray = [3, 7,  21, 31 , 42, 70, 100, 161, 210, 275, 325]
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
+df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2019*.csv')
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--deviationLowerArray', type=ast.literal_eval, default=[],
