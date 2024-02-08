@@ -227,7 +227,7 @@ for _ in range(10):  # We already have the first value, so we only need 10 more
 expirationDaysPut = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
 expirationDaysCall = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
 
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2018*.csv')
+df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
 df_options = df_options.set_index('quotedate', drop=False)
 df_options = df_options.sort_index()
 df_stock = getStockData('SPY', '2017-10-01')
