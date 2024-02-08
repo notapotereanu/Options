@@ -158,11 +158,9 @@ def closeCallOption(leverage, portafoglio, trackingFileName, df_stock, todaysDat
     portafoglio.callStrikePrice = 0
     return tracking
 
-def calculateProfit(df_options,df_stock, leverage, deviationLower, deviationUpper, expirationDaysPut, expirationDaysCall):
+def calculateProfit(df_options,df_stock, leverage, expirationDaysPut, expirationDaysCall,trackingFileName):
     portafoglio = Portfolio(0)
-    trackingFileName = f'Tracking/tracking_L_{deviationLower}_U_{deviationUpper}_EP_{expirationDaysPut}_EC_{expirationDaysCall}L_{leverage}.csv'
-    if os.path.isfile(trackingFileName):
-        return
+
     unique_dates = sorted(df_options.index.unique().tolist())
     tracking = []
 
@@ -229,7 +227,7 @@ for _ in range(10):  # We already have the first value, so we only need 10 more
 expirationDaysPut = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
 expirationDaysCall = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
 
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
+df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2018*.csv')
 df_options = df_options.set_index('quotedate', drop=False)
 df_options = df_options.sort_index()
 df_stock = getStockData('SPY', '2017-10-01')
@@ -249,10 +247,14 @@ for deviationLower in np.arange(deviationLowerArrayFrom, deviationLowerArrayTo, 
         for expirationDaysPutSingle in expirationDaysPut:
             for expirationDaysCallSingle in expirationDaysCall:
                 start_time = time.time()
+                trackingFileName = f'Tracking/tracking_L_{round(deviationLower,2)}_U_{round(deviationUpper,2)}_EP_{expirationDaysPutSingle}_EC_{expirationDaysCallSingle}L_{leverage}.csv'
+                if os.path.isfile(trackingFileName):
+                    continue
                 df_stock_bolingher = getBolingherBands(df_stock, round(deviationUpper,2), round(deviationLower,2))
-                calculateProfit(df_options, df_stock_bolingher, leverage, round(deviationLower,2), round(deviationUpper,2), expirationDaysPutSingle, expirationDaysCallSingle)
+                calculateProfit(df_options, df_stock_bolingher, leverage, expirationDaysPutSingle, expirationDaysCallSingle,trackingFileName)
                 end_time = time.time()
                 print('Execution time: ' + str(end_time - start_time) + ' seconds' + ' L: '
                       + str(round(deviationLower,2)) + ' U: ' + str(round(deviationUpper,2)) + 
-                      ' EP: ' + str(expirationDaysPutSingle) + ' EC: ' + str(expirationDaysCallSingle) + ' L: ' + str(leverage))
+                      ' EP: ' + str(expirationDaysPutSingle) + ' EC: ' + str(expirationDaysCallSingle) + 
+                      ' L: ' + str(leverage))
 print('Done')
