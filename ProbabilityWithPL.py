@@ -219,8 +219,15 @@ def calculateProfit(df_options,df_stock, leverage, deviationLower, deviationUppe
 
 
 leverage = 1
-expirationDaysPutTimes = 10
-expirationDaysCallTimes = 10
+import math
+
+expirationDaysPut = [1]
+for _ in range(10):  # We already have the first value, so we only need 10 more
+    next_value = expirationDaysPut[-1] * 1.61
+    expirationDaysPut.append(math.ceil(next_value))  # Round up to the nearest integer
+
+expirationDaysPut = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
+expirationDaysCall = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
 
 df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
 df_options = df_options.set_index('quotedate', drop=False)
@@ -238,14 +245,12 @@ deviationLowerArrayFrom = args.deviationLowerArrayFrom[0]
 deviationLowerArrayTo = args.deviationLowerArrayTo[0]
 
 for deviationLower in np.arange(deviationLowerArrayFrom, deviationLowerArrayTo, 0.1) :
-    for deviationUpper in np.arange(-1, 5, 0.1):
-        for expirationDaysPutSingle in range(1,expirationDaysPutTimes):
-            expirationDaysPut = int(round(1.61 * expirationDaysPutSingle,0))
-            for expirationDaysCallSingle in range(1,expirationDaysCallTimes):
+    for deviationUpper in np.arange(0, 5, 0.1):
+        for expirationDaysPutSingle in expirationDaysPut:
+            for expirationDaysCallSingle in expirationDaysCall:
                 start_time = time.time()
-                expirationDaysCall = int(round(1.61 * expirationDaysCallSingle,2))
                 df_stock_bolingher = getBolingherBands(df_stock, round(deviationUpper,2), round(deviationLower,2))
-                calculateProfit(df_options, df_stock_bolingher, leverage, round(deviationLower,2), round(deviationUpper,2), expirationDaysPut, expirationDaysCall)
+                calculateProfit(df_options, df_stock_bolingher, leverage, round(deviationLower,2), round(deviationUpper,2), expirationDaysPutSingle, expirationDaysCallSingle)
                 end_time = time.time()
                 print('Execution time: ' + str(end_time - start_time) + ' seconds' + ' L: ' + str(round(deviationLower,2)) + ' U: ' + str(round(deviationUpper,2)) + ' EP: ' + str(expirationDaysPut) + ' EC: ' + str(expirationDaysCall) + ' L: ' + str(leverage))
 print('Done')
