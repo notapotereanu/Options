@@ -252,5 +252,7 @@ for deviationLower in np.arange(deviationLowerArrayFrom, deviationLowerArrayTo, 
                 df_stock_bolingher = getBolingherBands(df_stock, round(deviationUpper,2), round(deviationLower,2))
                 calculateProfit(df_options, df_stock_bolingher, leverage, round(deviationLower,2), round(deviationUpper,2), expirationDaysPutSingle, expirationDaysCallSingle)
                 end_time = time.time()
-                print('Execution time: ' + str(end_time - start_time) + ' seconds' + ' L: ' + str(round(deviationLower,2)) + ' U: ' + str(round(deviationUpper,2)) + ' EP: ' + str(expirationDaysPut) + ' EC: ' + str(expirationDaysCall) + ' L: ' + str(leverage))
+                print('Execution time: ' + str(end_time - start_time) + ' seconds' + ' L: '
+                      + str(round(deviationLower,2)) + ' U: ' + str(round(deviationUpper,2)) + 
+                      ' EP: ' + str(expirationDaysPutSingle) + ' EC: ' + str(expirationDaysCallSingle) + ' L: ' + str(leverage))
 print('Done')
