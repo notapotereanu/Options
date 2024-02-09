@@ -227,10 +227,10 @@ for _ in range(10):  # We already have the first value, so we only need 10 more
 expirationDaysPut = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
 expirationDaysCall = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
 
-df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
-df_options = df_options.set_index('quotedate', drop=False)
-df_options = df_options.sort_index()
-df_stock = getStockData('SPY', '2017-10-01')
+#df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_20*.csv')
+#df_options = df_options.set_index('quotedate', drop=False)
+#df_options = df_options.sort_index()
+#df_stock = getStockData('SPY', '2017-10-01')
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--deviationLowerArrayFrom', type=ast.literal_eval, default=[],
@@ -242,19 +242,22 @@ args = parser.parse_args()
 deviationLowerArrayFrom = args.deviationLowerArrayFrom[0]
 deviationLowerArrayTo = args.deviationLowerArrayTo[0]
 
+pizza = 0
+
 for deviationLower in np.arange(deviationLowerArrayFrom, deviationLowerArrayTo, 0.1) :
     for deviationUpper in np.arange(0, 5, 0.1):
         for expirationDaysPutSingle in expirationDaysPut:
             for expirationDaysCallSingle in expirationDaysCall:
-                start_time = time.time()
-                trackingFileName = f'Tracking/tracking_L_{round(deviationLower,2)}_U_{round(deviationUpper,2)}_EP_{expirationDaysPutSingle}_EC_{expirationDaysCallSingle}L_{leverage}.csv'
-                if os.path.isfile(trackingFileName):
-                    continue
-                df_stock_bolingher = getBolingherBands(df_stock, round(deviationUpper,2), round(deviationLower,2))
-                calculateProfit(df_options, df_stock_bolingher, leverage, expirationDaysPutSingle, expirationDaysCallSingle,trackingFileName)
-                end_time = time.time()
-                print('Execution time: ' + str(end_time - start_time) + ' seconds' + ' L: '
-                      + str(round(deviationLower,2)) + ' U: ' + str(round(deviationUpper,2)) + 
-                      ' EP: ' + str(expirationDaysPutSingle) + ' EC: ' + str(expirationDaysCallSingle) + 
-                      ' L: ' + str(leverage))
-print('Done')
+                pizza = pizza + 1
+                #start_time = time.time()
+                #trackingFileName = f'Tracking/tracking_L_{round(deviationLower,2)}_U_{round(deviationUpper,2)}_EP_{expirationDaysPutSingle}_EC_{expirationDaysCallSingle}L_{leverage}.csv'
+                #if os.path.isfile(trackingFileName):
+                #    continue
+                #df_stock_bolingher = getBolingherBands(df_stock, round(deviationUpper,2), round(deviationLower,2))
+                #calculateProfit(df_options, df_stock_bolingher, leverage, expirationDaysPutSingle, expirationDaysCallSingle,trackingFileName)
+                #end_time = time.time()
+                #print('Execution time: ' + str(end_time - start_time) + ' seconds' + ' L: '
+                #      + str(round(deviationLower,2)) + ' U: ' + str(round(deviationUpper,2)) + 
+                #      ' EP: ' + str(expirationDaysPutSingle) + ' EC: ' + str(expirationDaysCallSingle) + 
+                #      ' L: ' + str(leverage))
+print(pizza*4/60/60/24/6)
