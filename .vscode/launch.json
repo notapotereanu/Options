@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["--deviationLowerArrayFrom", "[5]", "--deviationLowerArrayTo", "[6]"]
+            "args": ["--deviationLowerArrayFrom", "[5]", "--deviationLowerArrayTo", "[5.1]"]
         }
     ]
 }
