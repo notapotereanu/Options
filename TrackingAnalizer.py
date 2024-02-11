@@ -50,7 +50,6 @@ def analyze_tracking_data():
 def visualize_tracking_data():
     df = pd.read_csv('TrackingAnalizer.csv')
     
-    df = df[df['ExpirationPut'] == 11]
     agg_df = df.groupby(['Lower', 'Upper'])['Capital'].max().reset_index()
 
     # Pivot the DataFrame
@@ -62,4 +61,5 @@ def visualize_tracking_data():
     plt.title('Heatmap of Capital by Lower and Upper')
     plt.show()
 
+analyze_tracking_data()
 visualize_tracking_data()

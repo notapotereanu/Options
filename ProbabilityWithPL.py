@@ -251,7 +251,7 @@ def checkFileExists(filename, target_line):
     return False
 
 for deviationLower in np.arange(deviationLowerArrayFrom, deviationLowerArrayTo, 0.1) :
-    for deviationUpper in np.arange(0, 5, 0.1):
+    for deviationUpper in np.arange(0, 10, 0.1):
         for expirationDaysPutSingle in expirationDaysPut:
             for expirationDaysCallSingle in expirationDaysCall:
                 start_time = time.time()
