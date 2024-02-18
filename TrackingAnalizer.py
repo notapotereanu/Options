@@ -143,7 +143,7 @@ def visualize_strategy_with_spy(lower, upper, expirationPut, expirationCall):
             df['date'] = pd.to_datetime(df['date'])
             df['callOwnedContract'] = pd.to_numeric(df['callOwnedContract'], errors='coerce')
 
-            df['Options Capital'] = df['totalCapital'] + df['unrializedPnL'] + df['rializedPnL']
+            df['Options Capital'] = (df['totalCapital'] + df['unrializedPnL'] + df['rializedPnL'])
             tickerDf = tickerData.history(period='1d', start='2018-11-01', end='2023-11-30')
             tickerDf['Stock Capital'] = tickerDf['Close'] * 100 - 25059 # 25059 is the initial capital
             
@@ -158,7 +158,7 @@ def visualize_strategy_with_spy(lower, upper, expirationPut, expirationCall):
             plt.fill_between(df['date'], ymin, ymax, where=df['callOwnedStrike'] != 0.0, color='grey', alpha=0.5)
 
             # Fill between ymin and ymax where 'trackType' is 'bidTooLow'
-            plt.fill_between(df['date'], ymin, ymax, where=df['trackType'] == 'bidTooLow', color='red', alpha=0.5)
+            plt.fill_between(df['date'], ymin, ymax, where=df['trackType'] == 'bidTooLow', color='blue', alpha=0.5)
             plt.xlabel('Date')
             plt.ylabel('Capital')
             plt.title('Capital Over Time')
@@ -167,7 +167,7 @@ def visualize_strategy_with_spy(lower, upper, expirationPut, expirationCall):
             plt.show()
 
 
-analyze_tracking_data()
-#visualize_tracking_data()
-#visualize_tracking_particular_lower_upper(5.1,7.7)
-#visualize_strategy_with_spy(5.1, 7.7, 6, 3)
+#analyze_tracking_data()
+visualize_tracking_data()
+#visualize_tracking_particular_lower_upper(4.7, 4.9)
+#visualize_strategy_with_spy(4.7, 4.9, 3, 87)
