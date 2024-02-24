@@ -226,7 +226,8 @@ for _ in range(10):  # We already have the first value, so we only need 10 more
     expirationDaysPut.append(math.ceil(next_value))  # Round up to the nearest integer
 
 expirationDaysPut = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
-expirationDaysCall = [3, 6, 11, 19, 32, 53, 87, 142, 230, 372]
+expirationDaysPut = [11]
+expirationDaysCall = [3]
 
 df_options = loadOptionsDataframe('HistoricalOptionsCSV/SPY_2*.csv')
 df_options = df_options.set_index('quotedate', drop=False)
@@ -244,14 +245,17 @@ deviationLowerArrayFrom = args.deviationLowerArrayFrom[0]
 deviationLowerArrayTo = args.deviationLowerArrayTo[0]
 
 def checkFileExists(filename, target_line):
+    if not os.path.exists(filename):
+        return  False
+
     with open(filename, 'r', encoding='utf-16') as file:
         for line in file:
             if line.strip() == target_line:
                 return True
     return False
 
-for deviationLower in np.arange(deviationLowerArrayFrom, deviationLowerArrayTo, 0.1) :
-    for deviationUpper in np.arange(0, 10, 0.1):
+for deviationLower in np.arange(6.2, 6.3, 0.1) :
+    for deviationUpper in np.arange(1.9, 2.0, 0.1):
         for expirationDaysPutSingle in expirationDaysPut:
             for expirationDaysCallSingle in expirationDaysCall:
                 start_time = time.time()

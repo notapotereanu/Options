@@ -5,6 +5,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import yfinance as yf
+import asyncio
 
 expirationDaysPut = [6, 11, 19, 32, 53, 87, 142, 230, 372]
 
@@ -134,7 +135,7 @@ def visualize_strategy_with_spy(lower, upper, expirationPut, expirationCall):
         expirationCall = ""
     tickerData = yf.Ticker("SPY")
     for filename in os.listdir(directory):
-        if filename.startswith(f'tracking_L_{lower}_U_{upper}_EP_{expirationPut}_EC_{expirationCall}') and filename.endswith('.csv'):
+        if filename.startswith(f'tracking_L_{lower}_U_{upper}_EP_{expirationPut}_EC_{expirationCall}L_') and filename.endswith('.csv'):
             file_path = os.path.join(directory, filename)
             print(f'Processing file: {file_path}')
 
@@ -143,7 +144,7 @@ def visualize_strategy_with_spy(lower, upper, expirationPut, expirationCall):
             df['date'] = pd.to_datetime(df['date'])
             df['callOwnedContract'] = pd.to_numeric(df['callOwnedContract'], errors='coerce')
 
-            df['Options Capital'] = (df['totalCapital'] + df['unrializedPnL'] + df['rializedPnL'])
+            df['Options Capital'] = (df['totalCapital'] + df['unrializedPnL'] + df['rializedPnL']) 
             tickerDf = tickerData.history(period='1d', start='2018-11-01', end='2023-11-30')
             tickerDf['Stock Capital'] = tickerDf['Close'] * 100 - 25059 # 25059 is the initial capital
             
@@ -151,13 +152,10 @@ def visualize_strategy_with_spy(lower, upper, expirationPut, expirationCall):
             plt.plot(tickerDf.index, tickerDf['Stock Capital'], label='Stock Capital')
             plt.plot(df['date'], df['Options Capital'], label='Options Capital')
             
-            # Get the limits of the y-axis
             ymin, ymax = plt.ylim()
 
-            # Fill between ymin and ymax where 'callOwnedContract' is 1
             plt.fill_between(df['date'], ymin, ymax, where=df['callOwnedStrike'] != 0.0, color='grey', alpha=0.5)
 
-            # Fill between ymin and ymax where 'trackType' is 'bidTooLow'
             plt.fill_between(df['date'], ymin, ymax, where=df['trackType'] == 'bidTooLow', color='blue', alpha=0.5)
             plt.xlabel('Date')
             plt.ylabel('Capital')
@@ -168,6 +166,8 @@ def visualize_strategy_with_spy(lower, upper, expirationPut, expirationCall):
 
 
 #analyze_tracking_data()
-visualize_tracking_data()
-#visualize_tracking_particular_lower_upper(4.7, 4.9)
-#visualize_strategy_with_spy(4.7, 4.9, 3, 87)
+#visualize_tracking_data()
+#visualize_tracking_particular_lower_upper(6.2, 1.9)
+#visualize_strategy_with_spy(6.2, 1.9, 11,  3)# PUT STRATEGY
+visualize_strategy_with_spy(0.0,9.9,3,53)# CALL STRATEGY
+#visualize_strategy_with_spy(4.5, 4.8, 53, 19)# WHEEL STRATEGY
