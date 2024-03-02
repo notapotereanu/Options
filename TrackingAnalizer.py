@@ -169,5 +169,5 @@ def visualize_strategy_with_spy(lower, upper, expirationPut, expirationCall):
 #visualize_tracking_data()
 #visualize_tracking_particular_lower_upper(6.2, 1.9)
 #visualize_strategy_with_spy(6.2, 1.9, 11,  3)# PUT STRATEGY
-visualize_strategy_with_spy(0.0,9.9,3,53)# CALL STRATEGY
-#visualize_strategy_with_spy(4.5, 4.8, 53, 19)# WHEEL STRATEGY
+#visualize_strategy_with_spy(0.0,9.9,3,53)# CALL STRATEGY
+visualize_strategy_with_spy(4.5, 4.8, 53, 19)# WHEEL STRATEGY

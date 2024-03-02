@@ -13,7 +13,7 @@ expirationPut = 11
 
 def calculate_bollinger_bands(symbol, start_date, end_date, lower_std, upper_std):
     data = yf.download(symbol, start=start_date, end=end_date)
-    data['Rolling Mean'] = data['Close'].rolling(window=20).m ean()
+    data['Rolling Mean'] = data['Close'].rolling(window=20).mean()
     data['Rolling Std'] = data['Close'].rolling(window=20).std()
     data['Upper Band'] = data['Rolling Mean'] + (data['Rolling Std'] * upper_std)
     data['Lower Band'] = data['Rolling Mean'] - (data['Rolling Std'] * lower_std)
